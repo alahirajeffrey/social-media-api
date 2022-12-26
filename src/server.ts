@@ -6,7 +6,7 @@ dotenv.config();
 const server: Express = express();
 
 server.get("/", (req: Request, res: Response) => {
-  return res.json({ message: "welcome to the homepage" });
+  return res.status(200).json({ message: "welcome to the homepage" });
 });
 
 export default server;
