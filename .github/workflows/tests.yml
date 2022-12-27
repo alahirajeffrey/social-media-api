@@ -6,20 +6,19 @@ on:
 
 jobs:
   tests:
+    runs-on: ubuntu-latest
 
-  runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+      - uses: actions/checkout@v3
 
-  steps:
-    - name: Check out repository code
-    - uses: actions/checkout@v3
+      - name: Setup node
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16.x"
 
-    - name: Setup node
-    - uses: actions/setup-node@v2
-      with:
-        node-version: "16.x"
+      - name: Install dependencies
+      - run: npm install
 
-    - name: Install dependencies
-    - run: npm install
-
-    - run: echo "Running tests"
-    - run: npm run test
+      - run: echo "Running tests"
+      - run: npm run test
