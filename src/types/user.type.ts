@@ -1,5 +1,5 @@
 export type User = {
-  id: String;
-  email: String;
-  isVerified: Boolean;
+  id: string;
+  email: string;
+  isVerified: boolean;
 };
