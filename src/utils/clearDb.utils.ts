@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const clearUserTable = async () => {
-  return await prisma.user.deleteMany({ where: { otp: null } });
+  return await prisma.user.deleteMany({ where: {} });
 };
 
 export const clearProfileTable = async () => {
