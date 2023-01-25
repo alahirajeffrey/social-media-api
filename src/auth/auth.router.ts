@@ -1,25 +1,18 @@
 import { Router } from "express";
-import {
-  changePassword,
-  forgotPassword,
-  loginUser,
-  registerUser,
-  sendVerificationMail,
-  verifyEmail,
-} from "./auth.controller";
+import * as auth from "./auth.controller";
 
 const authRouter = Router();
 
-authRouter.post("/auth/register", registerUser);
+authRouter.post("/register", auth.registerUser);
 
-authRouter.post("/auth/login", loginUser);
+authRouter.post("/login", auth.loginUser);
 
-authRouter.patch("/auth/change-password", changePassword);
+authRouter.patch("/change-password", auth.changePassword);
 
-authRouter.patch("/auth/forgot-password", forgotPassword);
+authRouter.patch("/forgot-password", auth.forgotPassword);
 
-authRouter.post("/auth/send-verification-mail", sendVerificationMail);
+authRouter.post("/send-verification-mail", auth.sendVerificationMail);
 
-authRouter.post("/auth/verify-email", verifyEmail);
+authRouter.post("/verify-email", auth.verifyEmail);
 
 export default authRouter;
