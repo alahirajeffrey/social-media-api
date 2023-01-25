@@ -25,7 +25,8 @@ model Profile{
   bio String?
   mobileNumber String?
   profilePicUri String?
-  friends String[]
+  followers String[]
+  following String[]
   fullname String
   posts Post[] 
   user  User  @relation(fields: [userId], references: [id])
