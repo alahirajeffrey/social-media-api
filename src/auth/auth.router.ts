@@ -1,30 +1,21 @@
 import { Router } from "express";
 import { verifyToken } from "../utils/verifyToken";
-import {
-  changePassword,
-  forgotPassword,
-  loginUser,
-  registerUser,
-  sendVerificationMail,
-  verifyEmail,
-} from "./auth.controller";
+import * as auth from "./auth.controller";
 
 const authRouter = Router();
 
-authRouter.post("/auth/register", registerUser);
+authRouter.post("/register", auth.registerUser);
 
-authRouter.post("/auth/login", loginUser);
+authRouter.post("/login", auth.loginUser);
 
-authRouter.patch("/auth/change-password", verifyToken, changePassword);
+authRouter.patch("/change-password", verifyToken, auth.changePassword);
 
-authRouter.patch("/auth/forgot-password", forgotPassword);
+authRouter.patch("/forgot-password", auth.forgotPassword);
 
-authRouter.post(
-  "/auth/send-verification-mail",
-  verifyToken,
-  sendVerificationMail
-);
+authRouter.post("/send-verification-mail", auth.sendVerificationMail);
 
-authRouter.post("/auth/verify-email", verifyToken, verifyEmail);
+authRouter.post("/verify-email", auth.verifyEmail);
+
+authRouter.post("/logout", auth.logoutUser);
 
 export default authRouter;
