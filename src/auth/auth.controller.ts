@@ -101,6 +101,12 @@ export const loginUser = async (
   }
 };
 
+/**
+ * changes password of a logged in user
+ * @param req : Request
+ * @param res : response
+ * @returns : status code and message
+ */
 export const changePassword = async (req: Request, res: Response) => {
   try {
     const { oldPassword, newPassword, email } = req.body;
