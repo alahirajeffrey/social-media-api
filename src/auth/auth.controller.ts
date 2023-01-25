@@ -142,3 +142,5 @@ export const forgotPassword = async (req: Request, res: Response) => {};
 export const sendVerificationMail = async (req: Request, res: Response) => {};
 
 export const verifyEmail = async (req: Request, res: Response) => {};
+
+export const logoutUser = async (req: Request, res: Response) => {};
