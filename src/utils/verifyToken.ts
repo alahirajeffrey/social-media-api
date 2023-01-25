@@ -1,5 +1,7 @@
 import * as jwt from "jsonwebtoken";
 import express from "express";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
@@ -13,7 +15,9 @@ export const verifyToken = (
     if (!authHeader)
       return res.status(401).json({ message: "access token required" });
 
-    const token = authHeader.split("")[1];
+    const token = authHeader.split(" ")[1];
+
+    // verify token
     jwt.verify(token, JWT_SECRET, (err, user) => {
       if (err) return res.status(403).json({ message: err.message });
       req.user = user;
