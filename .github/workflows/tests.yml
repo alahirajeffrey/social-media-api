@@ -4,20 +4,35 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  DATABASE_URL : "postgresql://postgres:password@localhost:5432/test-db?schema=public"
+  JWT_SECRET : "secret"
+  EXPIRESIN : "15m"
+  PORT : "3000"
+
 jobs:
   tests:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
+      - name: check out repository and setup node
         uses: actions/checkout@v3
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: "16.x"
 
-      - name: Install dependencies
+      - name: install dependencies
         run: npm install
 
-      - name: Run tests
+      - name: database setup 
+        run: npm run db:test:up
+
+      - name: run migration
+        run: npm run prisma:db:push
+
+      - name: run tests
         run: npm run test
+
+      - name: stop and remove test db
+        run: npm run db:test:rm
