@@ -8,7 +8,7 @@ authRouter.post("/register", auth.registerUser);
 
 authRouter.post("/login", auth.loginUser);
 
-authRouter.patch("/change-password", verifyToken, auth.changePassword);
+authRouter.patch("/change-password", auth.changePassword);
 
 authRouter.patch("/forgot-password", auth.forgotPassword);
 
