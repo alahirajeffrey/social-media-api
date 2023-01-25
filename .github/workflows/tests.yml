@@ -24,10 +24,8 @@ jobs:
       - name: install dependencies
         run: npm install
 
-      - name: database setup
-        // start test db using docker compose 
+      - name: database setup 
         run: npm run db:test:up
-        // run migrations
         run: npm run prisma:db:push
 
       - name: run tests
