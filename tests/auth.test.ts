@@ -1,9 +1,9 @@
 import supertest from "supertest";
 import server from "../src/server";
-import { clearUserTable } from "../src/utils/clearDb.utils";
+import { clearTables } from "../src/utils/clearDb.utils";
 
-describe("Server", () => {
-  beforeAll(clearUserTable);
+describe("Authentication Routes", () => {
+  beforeAll(clearTables);
 
   describe("test user registration", () => {
     it("should return a 201 status code", async () => {

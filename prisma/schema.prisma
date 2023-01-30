@@ -25,17 +25,18 @@ model Profile{
   bio String?
   mobileNumber String?
   profilePicUri String?
-  friends String[]
+  followers String[]
+  following String[]
   fullname String
   posts Post[] 
-  user  User  @relation(fields: [userId], references: [id])
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique
   createdAt DateTime @default(now())
 }
 
 model Post{
   id String @id @default(uuid())
-  profile Profile @relation(fields: [profileId], references: [id])
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   profileId String
   title String
   content String
@@ -47,7 +48,7 @@ model Post{
 
 model Comment{
   id String @id @default(uuid())
-  post Post @relation(fields: [postId], references: [id])
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId  String
   content String 
   createdAt DateTime @default(now())
