@@ -61,7 +61,7 @@ describe("Profile Routes", () => {
     thirdUserProfile = await supertest(server)
       .post("/api/v1/profile/create-profile")
       .send({
-        bio: "thirf user bio",
+        bio: "third user bio",
         mobileNumber: "123456789",
         profilePicUri: "testProfilePic",
         userId: thirdUser._body.id,
@@ -156,6 +156,30 @@ describe("Profile Routes", () => {
         .expect(404, {
           message: "profile does not exist",
         });
+    });
+  });
+  describe("test route to get followers", () => {
+    it("should return 404 if a profile does not exist", async () => {
+      await supertest(server)
+        .get("/api/v1/profile/profile-id")
+        .set({ authorization: `Bearer ${secondUserJwt._body.accessToken}` })
+        .expect(404, {
+          message: "profile does not exist",
+        });
+    });
+    it("should follow another user to enable testing of get followers route", async () => {
+      await supertest(server)
+        .patch(
+          `/api/v1/profile/follow/${thirdUserProfile._body.id}/${secondUserProfile._body.id}`
+        )
+        .set({ authorization: `Bearer ${secondUserJwt._body.accessToken}` })
+        .expect(200);
+    });
+    it("should return a list of follower profiles", async () => {
+      await supertest(server)
+        .get(`/api/v1/profile/followers/${thirdUserProfile._body.id}`)
+        .set({ authorization: `Bearer ${thirdUserJwt._body.accessToken}` })
+        .expect(200);
     });
   });
 });
