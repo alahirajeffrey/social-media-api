@@ -19,7 +19,8 @@ export const createProfile = async (
   res: Response
 ): Promise<Response<ApiResponse>> => {
   try {
-    const { mobileNumber, profilePicUri, fullname, userId, bio } = req.body;
+    const { mobileNumber, profilePicUri, fullname, userId, bio, email } =
+      req.body;
 
     //check if user already has a profile
     const profileAlreadyExists = await prisma.profile.findFirst({
@@ -36,6 +37,7 @@ export const createProfile = async (
         profilePicUri: profilePicUri,
         userId: userId,
         fullname: fullname,
+        email: email,
       },
     });
     return res.status(201).json(newProfile);
@@ -57,17 +59,10 @@ export const getProfileByEmail = async (
   try {
     const email = req.params.email;
 
-    // check for user via email and use result to find user profile
-    const user = await prisma.user.findFirst({ where: { email: email } });
-    if (user) {
-      const profile = await prisma.profile.findFirst({
-        where: {
-          userId: user.id,
-        },
-      });
-      return res.status(200).json(profile);
-    }
-    return res.status(404).json({ message: "user does not exist" });
+    const profile = await prisma.profile.findFirst({ where: { email: email } });
+    if (!profile)
+      return res.status(404).json({ message: "profile does not exist" });
+    return res.status(200).json(profile);
   } catch (error: any) {
     return res.status(500).send({ error: error.message });
   }
@@ -85,14 +80,20 @@ export const followProfile = async (
 ): Promise<Response<ApiResponse>> => {
   try {
     const { profileId, followerId } = req.params;
+
     // check if profile exists
     const profileExists = await prisma.profile.findFirst({
       where: { id: profileId },
     });
 
+    const follower = await prisma.profile.findFirst({
+      where: { id: followerId },
+    });
+
     if (profileExists) {
       // get current followers of the profile
       const profileFollowers = profileExists.followers;
+      const numberOfFollowersBefore = profileFollowers.length;
 
       // check to see if the profile is already followed
       const alreadyFollowiingProfile = profileFollowers.find(
@@ -100,11 +101,12 @@ export const followProfile = async (
       );
       if (alreadyFollowiingProfile)
         return res.status(400).json({
-          message: `you cannot follow ${profileExists.fullname} once`,
+          message: `you can only follow ${profileExists.fullname} once`,
         });
 
       // add followeId to the list of the profile followers
       profileExists.followers.push(followerId);
+      const numberOfFollowersAfter = profileExists.followers.length;
 
       // update profile
       await prisma.profile.update({
@@ -112,9 +114,17 @@ export const followProfile = async (
         data: { followers: profileExists.followers },
       });
 
-      return res
-        .status(200)
-        .json({ message: `you are now following ${profileExists.fullname}` });
+      follower.following.push(profileExists.id);
+      await prisma.profile.update({
+        where: { id: followerId },
+        data: { following: follower.following },
+      });
+
+      return res.status(200).json({
+        message: `you are now following ${profileExists.fullname}`,
+        numberOfFollowersBefore: numberOfFollowersBefore,
+        numberOfFollowersAfter: numberOfFollowersAfter,
+      });
     }
     return res.status(404).json({ message: "profile does not exist" });
   } catch (error: any) {
@@ -136,34 +146,50 @@ export const unfollowProfile = async (
     const { profileId, followingId } = req.params;
 
     // check if profile exists
-    const profileExists = await prisma.profile.findFirst({
+    const followingExists = await prisma.profile.findFirst({
       where: { id: followingId },
     });
 
-    if (!profileExists)
+    if (!followingExists)
       return res.status(404).json({ message: "profile does not exist" });
 
     // get profiles being followed
-    const following = profileExists.following;
+    const profile = await prisma.profile.findFirst({
+      where: { id: profileId },
+    });
+
+    const following = profile.following;
+    const numberOfFollowingBefore = following.length;
 
     // check if user follows the profile
     const isProfileFollowed = following.find((id) => id === followingId);
+
     if (!isProfileFollowed)
       return res
         .status(400)
-        .json({ message: `you are not following ${profileExists.fullname}` });
+        .json({ message: `you are not following ${followingExists.fullname}` });
 
-    // remove profileId from list of those followed
-    profileExists.followers.filter((id) => id !== profileId);
-
-    // update profile
+    // update list of followers and following both profiles
+    const followerRemoved = followingExists.followers.filter(
+      (id) => id !== profileId
+    );
     await prisma.profile.update({
-      where: { id: profileExists.id },
-      data: { following: profileExists.followers },
+      where: { id: followingExists.id },
+      data: { following: followerRemoved },
+    });
+
+    const unfollowed = profile.following.filter((id) => id !== followingId);
+    const numberOfFollowingAfter = unfollowed.length;
+
+    await prisma.profile.update({
+      where: { id: profileId },
+      data: { following: unfollowed },
     });
 
     return res.status(200).json({
-      message: `you are no longer following ${profileExists.fullname}`,
+      message: `you are no longer following ${followingExists.fullname}`,
+      numberOfFollowingBefore: numberOfFollowingBefore,
+      numberOfFollowingAfter: numberOfFollowingAfter,
     });
   } catch (error: any) {
     return res.status(500).send({ error: error.message });
@@ -176,34 +202,34 @@ export const unfollowProfile = async (
 //  * @param res : response object
 //  * @returns : status code and list of profiles
 //  */
-// export const getFollowers = async (
-//   req: Request,
-//   res: Response
-// ): Promise<Response<ApiResponse>> => {
-//   try {
-//     const profileExists = await prisma.profile.findFirst({
-//       where: { id: req.body.profileId },
-//     });
+export const getFollowers = async (
+  req: Request,
+  res: Response
+): Promise<Response<ApiResponse>> => {
+  try {
+    const profileExists = await prisma.profile.findFirst({
+      where: { id: req.params.profileId },
+    });
 
-//     if (!profileExists)
-//       return res.status(404).json({ message: "profile does not exist" });
+    if (!profileExists)
+      return res.status(404).json({ message: "profile does not exist" });
 
-//     // get list of follower ids
-//     const followerIds = profileExists.followers;
-//     const followers = [];
+    // get list of follower ids
+    const followerIds = profileExists.followers;
+    const followers = [];
 
-//     // loop through list of followerIds and get profile of followers
-//     for (let follower = 0; follower <= followerIds.length - 1; follower++) {
-//       followers.push(
-//         await prisma.profile.findFirst({ where: { id: followerIds[follower] } })
-//       );
-//     }
+    // loop through list of followerIds and get profile of followers
+    for (let follower = 0; follower <= followerIds.length - 1; follower++) {
+      followers.push(
+        await prisma.profile.findFirst({ where: { id: followerIds[follower] } })
+      );
+    }
 
-//     return res.status(200).json(followers);
-//   } catch (error: any) {
-//     return res.status(500).send({ error: error.message });
-//   }
-// };
+    return res.status(200).json(followers);
+  } catch (error: any) {
+    return res.status(500).send({ error: error.message });
+  }
+};
 
 // /**
 //  * gets profiles of people followed
@@ -211,33 +237,33 @@ export const unfollowProfile = async (
 //  * @param res : response object
 //  * @returns : profile of people followed
 //  */
-// export const getPeopleFollowed = async (
-//   req: Request,
-//   res: Response
-// ): Promise<Response<ApiResponse>> => {
-//   try {
-//     const profileExists = await prisma.profile.findFirst({
-//       where: { id: req.body.profileId },
-//     });
+export const getPeopleFollowed = async (
+  req: Request,
+  res: Response
+): Promise<Response<ApiResponse>> => {
+  try {
+    const profileExists = await prisma.profile.findFirst({
+      where: { id: req.params.profileId },
+    });
 
-//     if (!profileExists)
-//       return res.status(404).json({ message: "profile does not exist" });
+    if (!profileExists)
+      return res.status(404).json({ message: "profile does not exist" });
 
-//     // get list of profiles followed
-//     const followingIds = profileExists.following;
-//     const follows = [];
+    // get list of profiles followed
+    const followingIds = profileExists.following;
+    const follows = [];
 
-//     // loop through list of people followed and get profiles
-//     for (let following = 0; following <= followingIds.length - 1; following++) {
-//       follows.push(
-//         await prisma.profile.findFirst({
-//           where: { id: followingIds[following] },
-//         })
-//       );
-//     }
+    // loop through list of people followed and get profiles
+    for (let following = 0; following <= followingIds.length - 1; following++) {
+      follows.push(
+        await prisma.profile.findFirst({
+          where: { id: followingIds[following] },
+        })
+      );
+    }
 
-//     return res.status(200).json(follows);
-//   } catch (error: any) {
-//     return res.status(500).send({ error: error.message });
-//   }
-// };
+    return res.status(200).json(follows);
+  } catch (error: any) {
+    return res.status(500).send({ error: error.message });
+  }
+};

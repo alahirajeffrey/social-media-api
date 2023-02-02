@@ -20,12 +20,12 @@ profileRouter.patch(
   profile.unfollowProfile
 );
 
-// profileRouter.get("/followers/:profileId", verifyToken, profile.getFollowers);
+profileRouter.get("/followers/:profileId", verifyToken, profile.getFollowers);
 
-// profileRouter.get(
-//   "/following/:profileId",
-//   verifyToken,
-//   profile.getPeopleFollowed
-// );
+profileRouter.get(
+  "/following/:profileId",
+  verifyToken,
+  profile.getPeopleFollowed
+);
 
 export default profileRouter;
