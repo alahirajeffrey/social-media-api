@@ -71,6 +71,10 @@ describe("Profile Routes", () => {
       .set({ authorization: `Bearer ${thirdUserJwt._body.accessToken}` });
   });
 
+  afterAll(async () => {
+    clearTable.clearTables;
+  });
+
   describe("create profile test", () => {
     it("should create a profile for a logged in user", async () => {
       await supertest(server)
