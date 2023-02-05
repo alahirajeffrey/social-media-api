@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { ApiResponse } from "../interfaces/response.interface";
-import { json } from "stream/consumers";
 
 const prisma = new PrismaClient();
 
@@ -11,7 +10,7 @@ const prisma = new PrismaClient();
 /**
  * creates a profile for a user
  * @param req : request
- * @param res :response
+ * @param res :respSonse
  * @returns :  status code and profile object
  */
 export const createProfile = async (
