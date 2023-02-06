@@ -4,6 +4,12 @@ import { ApiResponse } from "../interfaces/response.interface";
 
 const prisma = new PrismaClient();
 
+/**
+ * create a post
+ * @param req : request object
+ * @param res : response object
+ * @returns : a post object and status code
+ */
 export const createPost = async (
   req: Request,
   res: Response
@@ -17,12 +23,18 @@ export const createPost = async (
         content: content,
       },
     });
-    return res.status(201).json({ post });
+    return res.status(201).json(post);
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
   }
 };
 
+/**
+ * get a post by id
+ * @param req : request object
+ * @param res : response object
+ * @returns : post object and status code
+ */
 export const getPostById = async (
   req: Request,
   res: Response
@@ -37,6 +49,12 @@ export const getPostById = async (
   }
 };
 
+/**
+ * get all posts belonging to a user
+ * @param req: request object
+ * @param res: response object
+ * @returns: returns a list of posts and status code
+ */
 export const getAllUsersPosts = async (
   req: Request,
   res: Response
@@ -56,6 +74,12 @@ export const getAllUsersPosts = async (
   }
 };
 
+/**
+ * delete a post
+ * @param req : request object
+ * @param res : response object
+ * @returns : status code and message
+ */
 export const deletePost = async (
   req: Request,
   res: Response
