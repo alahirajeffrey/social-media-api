@@ -7,8 +7,6 @@ import * as jwt from "jsonwebtoken";
 const JWTSECRET = process.env.JWT_SECRET || "secret";
 const EXPIRESIN = process.env.EXPIRESIN || "15m";
 
-// remember to sanitize and validate income data
-
 const prisma = new PrismaClient();
 
 /**
