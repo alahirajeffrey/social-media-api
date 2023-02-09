@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyToken } from "../utils/verifyToken";
+import { verifyToken } from "../middlewares/verifyToken";
 import * as comment from "./comment.controller";
 
 const commentRouter = Router();
